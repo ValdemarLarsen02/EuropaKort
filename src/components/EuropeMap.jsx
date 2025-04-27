@@ -26,7 +26,7 @@ export function EuropeMap() {
 
   const handleMapClick = async (event) => {
     const target = event.target;
-    if (target.tagName.toLowerCase() === "path" && target.id) {
+    if (target.tagName.toLowerCase() === "path" && target.id) { // Tjekker at det er en path element og at det har et id.
       const countryId = target.id;
 
       if (selectedCountryId) {
