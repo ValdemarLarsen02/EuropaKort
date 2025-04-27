@@ -26,7 +26,6 @@ export function EuropeMap() {
 
   const handleMapClick = async (event) => {
     const target = event.target;
-    console.log(import.meta.env.VITE_SOME_KEY) // "123"
     if (target.tagName.toLowerCase() === "path" && target.id) {
       const countryId = target.id;
 
