@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SvgComponent from "../components/SvgComponent"; // Importér din SVG som et React-komponent
 
 export function EuropeMap() {
@@ -6,11 +6,27 @@ export function EuropeMap() {
   const [loading, setLoading] = useState(false);
   const [selectedCountryId, setSelectedCountryId] = useState(null);
   const [weatherInfo, setWeatherInfo] = useState(null); // State til at holde data for vejret
-  const apiKey = import.meta.env.VITE_WEATHER_API_KEY; // API nøgle for vejr api.
+  const [userLocation, setUserLocation] = useState(null); // State til at holde brugerens placering
+  const apiKey = import.meta.env.VITE_SOME_KEY; // API nøgle for vejr api. |
+
+  // Hent brugerens position ved hjælp af geolocation
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserLocation({ latitude, longitude });
+        },
+        (error) => {
+          console.error("Geolocation error:", error);
+        }
+      );
+    }
+  }, []);
 
   const handleMapClick = async (event) => {
     const target = event.target;
-
+    console.log(import.meta.env.VITE_SOME_KEY) // "123"
     if (target.tagName.toLowerCase() === "path" && target.id) {
       const countryId = target.id;
 
@@ -36,9 +52,11 @@ export function EuropeMap() {
         setCountryInfo(data[0]);
        
         // Når vi nu ved hovedstaden, hent vejret:
+       // const apiKey = import.meta.env.VITE_WEATHER_API_KEY; 
+        console.log(apiKey)
         if (data[0].capital?.[0]) {
           const weatherResponse = await fetch(
-            `https://api.openweathermap.org/data/2.5/weather?q=${data[0].capital[0]}&appid=${apiKey}&units=metric`
+            `https://api.openweathermap.org/data/2.5/weather?q=${data[0].capital[0]}&APPID=${apiKey}&units=metric`
           );
           if (!weatherResponse.ok) {
             throw new Error("Fejl fra vejr-API");
@@ -79,6 +97,7 @@ export function EuropeMap() {
           <p>
             <strong>Hovedstad:</strong> {countryInfo.capital?.[0]}
           </p>
+          
           <img
             src={countryInfo.flags.svg}
             alt={`Flag ${countryInfo.name.common}`}
@@ -86,6 +105,7 @@ export function EuropeMap() {
           />
         </div>
       )}
+
       {weatherInfo && (
         <div style={{ marginTop: "20px" }}>
           <h3>Vejret i {weatherInfo.name}</h3>
@@ -99,6 +119,18 @@ export function EuropeMap() {
             src={`https://openweathermap.org/img/wn/${weatherInfo.weather[0].icon}@2x.png`}
             alt={weatherInfo.weather[0].description}
           />
+        </div>
+      )}
+
+      {userLocation && (
+        <div style={{ marginTop: "20px" }}>
+          <h3>Din nuværende placering</h3>
+          <p>
+            <strong>Breddegrad:</strong> {userLocation.latitude}
+          </p>
+          <p>
+            <strong>Længdegrad:</strong> {userLocation.longitude}
+          </p>
         </div>
       )}
     </div>
