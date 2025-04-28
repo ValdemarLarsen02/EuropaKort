@@ -10,6 +10,8 @@ export function EuropeMap() {
   const apiKey = import.meta.env.VITE_SOME_KEY; // API nøgle for vejr api. |
 
   // Hent brugerens position ved hjælp af geolocation
+  //Ved ikke hvad det skal bruges til endnu :)))))
+  // Men et eller andet med at den viser det land brugeren er i :D very nice yes
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -28,17 +30,24 @@ export function EuropeMap() {
     const target = event.target;
     if (target.tagName.toLowerCase() === "path" && target.id) { // Tjekker at det er en path element og at det har et id.
       const countryId = target.id;
-
       if (selectedCountryId) {
+        //Bør fikse lande som gb og rusland fordi jeg har lavet om i datasættet/svg komponentet
+        const prevSelectedPaths = Array.from(document.querySelectorAll(`path[id="${selectedCountryId}"]`));
+        prevSelectedPaths.forEach((path) => {
+          path.style.fill = "silver";
+        });
+
         const prevSelected = document.getElementById(selectedCountryId);
+        console.log('Tidligere valgt:', selectedCountryId, 'Element fundet:', !!prevSelected);
         if (prevSelected) {
-          prevSelected.style.fill = "silver"; // Sætter faven tilbage til den original farve
+          prevSelected.style.fill = "silver";
         }
       }
 
+
       target.style.fill = "red";
       setSelectedCountryId(countryId);
-
+      console.log(countryId)
       try {
         setLoading(true);
         const response = await fetch(
@@ -49,10 +58,11 @@ export function EuropeMap() {
         }
         const data = await response.json();
         setCountryInfo(data[0]);
-       
+        console.log(JSON.stringify(data[0], null, 2))
+
         // Når vi nu ved hovedstaden, hent vejret:
-       // const apiKey = import.meta.env.VITE_WEATHER_API_KEY; 
-        console.log(apiKey)
+        // const apiKey = import.meta.env.VITE_WEATHER_API_KEY; 
+
         if (data[0].capital?.[0]) {
           const weatherResponse = await fetch(
             `https://api.openweathermap.org/data/2.5/weather?q=${data[0].capital[0]}&APPID=${apiKey}&units=metric`
@@ -63,7 +73,7 @@ export function EuropeMap() {
           const weatherData = await weatherResponse.json();
           setWeatherInfo(weatherData);
         }
-        
+
       } catch (error) {
         console.error(error);
       } finally {
@@ -96,7 +106,7 @@ export function EuropeMap() {
           <p>
             <strong>Hovedstad:</strong> {countryInfo.capital?.[0]}
           </p>
-          
+          <p>{countryInfo.currencies[0]}</p>
           <img
             src={countryInfo.flags.svg}
             alt={`Flag ${countryInfo.name.common}`}
